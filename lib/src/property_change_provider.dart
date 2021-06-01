@@ -31,26 +31,28 @@ class PropertyChangeProvider<T extends PropertyChangeNotifier> extends StatefulW
   /// for certain properties, provide them in the [properties] parameter.
   /// If [listen] is false, the [properties] parameter must be null or empty.
   static PropertyChangeModel<T> of<T extends PropertyChangeNotifier>(
-    BuildContext context, {
-    Iterable<Object> properties,
-    bool listen = true,
-  }) {
+      BuildContext context, {
+        Iterable<Object> properties,
+        bool listen = true,
+      }) {
     assert(listen || properties == null, "Don't provide properties if you're not going to listen to them.");
 
-    PropertyChangeModel<T> nullCheck(PropertyChangeModel<T> model) {
+    final typeOf = <T>() => T;
+
+    final nullCheck = (InheritedModel model) {
       assert(model != null, 'Could not find an ancestor PropertyChangeProvider<$T>');
       return model;
     };
 
     if (!listen) {
-      return nullCheck(context.findAncestorWidgetOfExactType<PropertyChangeModel<T>>());
+      return nullCheck(context.findAncestorWidgetOfExactType<PropertyChangeModel<T>>() as PropertyChangeModel);
     }
 
     if (properties == null || properties.isEmpty) {
       return nullCheck(InheritedModel.inheritFrom<PropertyChangeModel<T>>(context));
     }
 
-    PropertyChangeModel<T> widget;
+    InheritedModel widget;
     for (final property in properties) {
       widget = InheritedModel.inheritFrom<PropertyChangeModel<T>>(context, aspect: property);
     }
@@ -59,7 +61,7 @@ class PropertyChangeProvider<T extends PropertyChangeNotifier> extends StatefulW
   }
 
   /// Creates a [PropertyChangeProvider] that can be accessed by descendant widgets.
-  const PropertyChangeProvider({
+  PropertyChangeProvider({
     Key key,
     @required this.value,
     @required this.child,
@@ -128,11 +130,11 @@ class _PropertyChangeProviderState<T extends PropertyChangeNotifier> extends Sta
 /// to the [PropertyChangeProvider].[of] method.
 /// The type parameter [T] is the type of the [PropertyChangeNotifier] subclass.
 class PropertyChangeModel<T extends PropertyChangeNotifier> extends InheritedModel {
-  final _PropertyChangeProviderState<T> _state;
+  final _PropertyChangeProviderState _state;
 
-  const PropertyChangeModel({
+  PropertyChangeModel({
     Key key,
-    _PropertyChangeProviderState<T> state,
+    _PropertyChangeProviderState state,
     Widget child,
   })  : _state = state,
         super(key: key, child: child);
